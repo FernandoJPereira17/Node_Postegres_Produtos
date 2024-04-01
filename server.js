@@ -1,62 +1,90 @@
-import Fastify from "fastify";
-import { produtoService } from "./services/produtos.service.js";
-import { connection } from "./db/db.js";
-import { config } from "./db/config/index.js";
+import fastify from 'fastify';
+import cors from '@fastify/cors';
+import { rotasProdutos } from './controller/produto.controller.js';
+import { connection } from './db/db.js';
+import { config } from './db/config/index.js';
 
-const fastify = Fastify({
-  logger: false,
+const PORT = 8080
+const HOST = '127.0.0.1'
+
+const app = fastify({ logger: false });
+
+app.register(cors, {
+    origin: '*',
 });
 
-connection();
+connection()
 
-const PORT = 5000;
+app.get('/', (res, reply) => {
+    return {
+        "code": 200,
+        status: "UP",
+        message: "Servidor Rodando!"
+    }
+})
 
-fastify.get("/", (req, reply) => {
-  
-  reply.send({
-    code: 200,
-    status: "UP",
-    message: "Servidor Rodando!",
-  });
-});
-
-fastify.get("/produto/:id", async (req, res)=> {
-    const result = await config.query('SELECT * from produtos');
+app.get('/produtos', async (req, res) => {
+    const result = await config.query('SELECT * FROM produtos');
     return result.rows;
 })
 
-app.post('/produto', async (req, res) => {
-  const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
+app.get('/produto/:id', async (req, res) => {
+    const id = req.params.id;
+    const query = `SELECT * FROM produtos WHERE id = ${id}`
+    console.log(`[QUERY]: ${query}`);
+    
+    const result = await config.query(query);
 
-  try {
-      const query = 'INSERT INTO produtos (nome, descricao, desconto, preco, ativo, categoria, data_cadastro) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
-      const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
-      const result = await config.query(query, values);
-      res.send(result.rows[0]);
-  } catch (err) {
-      console.log('Erro ao inserir produto:', err);
-      res.status(500).send('Erro ao inserir produto');
-  }
+    if(result.rows.length === 0){
+        res.status(404).send(`Produto com o id ${id} não encontrado!`);
+    }
+    return result.rows;
 })
 
-fastify.get("/produto", produtoService.buscarProdutos);
-fastify.get("/produtos", produtoService.buscarProdutos);
-fastify.get("/produto/?status=ativo", produtoService.buscarProdutos);
-fastify.post("/produto", produtoService.addProduto);
-// fastify.put("/produto/:id", produtoService.atualizarProduto);
-// fastify.patch("/produto/:id", produtoService.atualizarParcialProduto);
-// fastify.delete("/produto/:id", produtoService.deleteProduto);
 
-//GET /produto GET /produtos GET /produto/?status=ativo 
-//POST /produto 
-//PUT /produto/:id 
-//PATCH /produto/:id 
-//DELETE /produto/:id
 
-fastify.listen({ port: PORT }, (err, address) => {
-  if (err) {
-    console.error("Erro ao subuir o servidor", err);
-    return;
-  }
-  console.log(`Server ins now listening on ${address}`);
+//EXEMPLO...
+// app.get('/produto/:id', async (req, res)=> {
+//     try {
+//         const { id } = req.params.id;
+//         const query = 'SELECT * FROM produtos WHERE id = $1';
+//         const result = await config.query (query, [id]);
+
+//         if (result.rows.length > 0){
+//             res.json(result.rows[1]);
+//         } else {
+//             res.status(404).json({ message: 'Produto não encontrado...' });
+//         }
+//       } catch (error) {
+//         console.error('Erro na Consulta:', error);
+//         res.status(500).json({ message: 'Erro no Servidor...' });
+//       }
+//     });
+
+app.post('/produto', async (req, res) => {
+    const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
+
+    try {
+        const query = 'INSERT INTO produtos (nome, descricao, desconto, preco, ativo, categoria, data_cadastro) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
+        const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
+        const result = await config.query(query, values);
+        res.send(result.rows[0]);
+    } catch (err) {
+        console.log('Erro ao inserir produto:', err);
+        res.status(500).send('Erro ao inserir produto');
+    }
+})
+
+//app.register(rotasProdutos);
+
+app.listen({ /* host: 'localhost', */ port: `5000` }, (err, address) => {
+    if (err) {
+        /* app.log.error(err);
+        process.exit(1); */
+        console.log(`Erro ao rodar os ervidor: ${err}`);
+        return;
+    }
+    app.log.info(`Server listening on ${address}`);
+    console.log(`Server listening on ${address}`);
+    //console.log(`Server listening on http://${HOST}:${PORT}`);
 });
