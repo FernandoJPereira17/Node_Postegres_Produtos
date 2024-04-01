@@ -1,0 +1,20 @@
+//Buscar Produtos
+GET http://localhost:5000/
+
+###
+GET http://localhost:5000/produto/1
+
+###
+POST http://localhost:5000/produto
+
+Content-Type: application/json
+{
+    "id": 1,    
+    "nome": "Produto 01",
+    "descricao": "Qualidade Boa...",
+    "desconto":"10",
+    "preco":"200",
+    "ativo": "Atualizado...",
+    "categoria":"Tecnologia",
+    "data_cadastro":"10102024",
+}
