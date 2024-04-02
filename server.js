@@ -37,11 +37,31 @@ app.get('/produto/:id', async (req, res) => {
 
     if(result.rows.length === 0){
         res.status(404).send(`Produto com o id ${id} não encontrado!`);
+        return;
     }
     return result.rows;
 })
 
+app.put('/produto', async (req, res) => {
+    const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
 
+    try {
+        const query = 'UPDATE produtos SET nome=$1, descricao=$2, desconto=$3, preco=$4, ativo=$5, categoria=$6, data_cadastro=$7 WHERE id = $4';
+        const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
+        const result = await config.query(query, values);
+        res.send(result.rows[0]);
+    } catch (err) {
+        console.log('Erro ao inserir produto:', err);
+        res.status(500).send('Erro ao inserir produto');
+    }
+})
+
+app.delete ('/produto/:id', async (req, res) =>{
+    const id = req.params.id;
+    const query = 'DELETE FROM produtos WHERE id=$1'
+    const values = [id];
+    await config.query(query, values);
+})
 
 //EXEMPLO...
 // app.get('/produto/:id', async (req, res)=> {

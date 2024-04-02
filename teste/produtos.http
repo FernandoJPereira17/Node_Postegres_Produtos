@@ -1,20 +1,36 @@
 GET http://[::1]:5000/produtos
 ###
 
-
 POST http://[::1]:5000/produto
 Content-Type: application/json
 
 {
-    "id": 5,
-    "nome": "Produto 5_Test",
-    "descricao": "Descrição do produto 4 teste",
-    "desconto": 20.00,
-    "preco": 300.0,
-    "ativo": false,
-    "categoria": "Teste_5_Teste",
+    "nome": "Produto_Teste1",
+    "descricao": "Descrição do produto teste",
+    "desconto": 10,
+    "preco": 99,
+    "ativo": true,
+    "categoria": "Teste",
     "data_cadastro": "2024-04-01"
 }
 
 ###
-GET http://[::1]:5000/produto/10
+GET http://[::1]:5000/produto/1
+
+###
+PUT http://[::1]:5000/produto
+
+Content-Type: application/json
+{
+    "nome": "Produto_Teste1",
+    "descricao": "Descrição do produto teste",
+    "desconto": 10,
+    "preco": 99.00,
+    "ativo": false,
+    "categoria": "Teste_1_Teste",
+    "data_cadastro": "2024-04-00"
+}
+
+###
+DELETE http://[::1]:5000/produto/17
+
