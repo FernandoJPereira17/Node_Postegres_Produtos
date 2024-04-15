@@ -1,8 +1,7 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { rotasProdutos } from './controller/produto.controller.js';
 import { connection } from './db/db.js';
-import { config } from './db/config/index.js';
+import { produtosRoute } from './routes/produtos.routes.js';
 
 const PORT = 8080
 const HOST = '127.0.0.1'
@@ -14,6 +13,7 @@ app.register(cors, {
 });
 
 connection()
+produtosRoute(app)
 
 app.get('/', (res, reply) => {
     return {
@@ -23,79 +23,6 @@ app.get('/', (res, reply) => {
     }
 })
 
-app.get('/produtos', async (req, res) => {
-    const result = await config.query('SELECT * FROM produtos');
-    return result.rows;
-})
-
-app.get('/produto/:id', async (req, res) => {
-    const id = req.params.id;
-    const query = `SELECT * FROM produtos WHERE id = ${id}`
-    console.log(`[QUERY]: ${query}`);
-    
-    const result = await config.query(query);
-
-    if(result.rows.length === 0){
-        res.status(404).send(`Produto com o id ${id} não encontrado!`);
-        return;
-    }
-    return result.rows;
-})
-
-app.put('/produto', async (req, res) => {
-    const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
-
-    try {
-        const query = 'UPDATE produtos SET nome=$1, descricao=$2, desconto=$3, preco=$4, ativo=$5, categoria=$6, data_cadastro=$7 WHERE id = $4';
-        const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
-        const result = await config.query(query, values);
-        res.send(result.rows[0]);
-    } catch (err) {
-        console.log('Erro ao inserir produto:', err);
-        res.status(500).send('Erro ao inserir produto');
-    }
-})
-
-app.delete ('/produto/:id', async (req, res) =>{
-    const id = req.params.id;
-    const query = 'DELETE FROM produtos WHERE id=$1'
-    const values = [id];
-    await config.query(query, values);
-})
-
-//EXEMPLO...
-// app.get('/produto/:id', async (req, res)=> {
-//     try {
-//         const { id } = req.params.id;
-//         const query = 'SELECT * FROM produtos WHERE id = $1';
-//         const result = await config.query (query, [id]);
-
-//         if (result.rows.length > 0){
-//             res.json(result.rows[1]);
-//         } else {
-//             res.status(404).json({ message: 'Produto não encontrado...' });
-//         }
-//       } catch (error) {
-//         console.error('Erro na Consulta:', error);
-//         res.status(500).json({ message: 'Erro no Servidor...' });
-//       }
-//     });
-
-app.post('/produto', async (req, res) => {
-    const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
-
-    try {
-        const query = 'INSERT INTO produtos (nome, descricao, desconto, preco, ativo, categoria, data_cadastro) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
-        const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
-        const result = await config.query(query, values);
-        res.send(result.rows[0]);
-    } catch (err) {
-        console.log('Erro ao inserir produto:', err);
-        res.status(500).send('Erro ao inserir produto');
-    }
-})
-
-//app.register(rotasProdutos);
 
 app.listen({ /* host: 'localhost', */ port: `5000` }, (err, address) => {
     if (err) {

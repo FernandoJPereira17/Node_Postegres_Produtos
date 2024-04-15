@@ -1,36 +1,58 @@
-import { produtos } from "../db/produtos.js";
+import { config } from "../db/config/index.js";
 
 export const produtoService = {
-  buscarProdutos: (req, reply) => {
-    return {
-      code: 200,
-      status: "UP",
-      message: "Servidor Rodando!",
-    };
-  },
-  addProduto: (req, res) => {
 
-        let produtoReq = req.body;
-        let id = produtos.length +1
-        req.body.nome = `Produto${id}`
-        req.body.id = id
-        return produtos.push(produtoReq);
+    buscarTodos: async (req, res) => {
+        const result = await config.query('SELECT * FROM produtos');
+        return result.rows;
+    },
 
+    buscarProdutoPorId: async (req, res) => {
+        const id = req.params.id;
+        const query = `SELECT * FROM produtos WHERE id = ${id}`
+        console.log(`[QUERY]: ${query}`);
+        
+        const result = await config.query(query);
+    
+        if(result.rows.length === 0){
+            res.status(404).send(`Produto com o id ${id} não encontrado!`);
+            return;
+        }
+        return result.rows;
+    },
 
-    // let idNext = produtos.length + 1;
-    // const { id, nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body
-    // let produtoBd = {
-    //     id: idNext,
-    //     nome: `Nome ${idNext}`,
-    //     descricao,
-    //     desconto,
-    //     preco,
-    //     ativo,
-    //     categoria,
-    //     data_cadastro,
-    //  }
-    //  return produtos.push(produtoBd);
-  },
+    atualizarProduto: async (req, res) => {
+        const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
+    
+        try {
+            const query = 'UPDATE produtos SET nome=$1, descricao=$2, desconto=$3, preco=$4, ativo=$5, categoria=$6, data_cadastro=$7 WHERE id = $4';
+            const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
+            const result = await config.query(query, values);
+            res.send(result.rows[0]);
+        } catch (err) {
+            console.log('Erro ao inserir produto:', err);
+            res.status(500).send('Erro ao inserir produto');
+        }
+    },
 
-  
-};
+    createProduto: async (req, res) => {
+        const { nome, descricao, desconto, preco, ativo, categoria, data_cadastro } = req.body;
+    
+        try {
+            const query = 'INSERT INTO produtos (nome, descricao, desconto, preco, ativo, categoria, data_cadastro) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *';
+            const values = [nome, descricao, desconto, preco, ativo, categoria, data_cadastro];
+            const result = await config.query(query, values);
+            res.send(result.rows[0]);
+        } catch (err) {
+            console.log('Erro ao inserir produto:', err);
+            res.status(500).send('Erro ao inserir produto');
+        }
+    },
+
+    deletarProduto: async (req, res) =>{
+        const id = req.params.id;
+        const query = 'DELETE FROM produtos WHERE id=$1'
+        const values = [id];
+        await config.query(query, values);
+    }
+}
