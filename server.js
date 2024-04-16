@@ -3,8 +3,11 @@ import cors from '@fastify/cors';
 import { connection } from './db/db.js';
 import { produtosRoute } from './routes/produtos.routes.js';
 
-const PORT = 8080
-const HOST = '127.0.0.1'
+const PORT = 5000
+
+//Para subir no render o HOST precisa ser adicionando como '0.0.0.0', 
+//quando não houver variável de ambiente HOST o servidor usará '127.0.0.1'
+const HOST = process.env.HOST || '127.0.0.1';
 
 const app = fastify({ logger: false });
 
@@ -12,8 +15,8 @@ app.register(cors, {
     origin: '*',
 });
 
-connection()
-produtosRoute(app)
+connection();
+produtosRoute(app);
 
 app.get('/', (res, reply) => {
     return {
@@ -24,7 +27,7 @@ app.get('/', (res, reply) => {
 })
 
 
-app.listen({ /* host: 'localhost', */ port: `5000` }, (err, address) => {
+app.listen({ host: HOST, port: PORT }, (err, address) => {
     if (err) {
         /* app.log.error(err);
         process.exit(1); */

@@ -13,4 +13,5 @@ export const config = new Pool({
     database: process.env.DB_NAME,
     password: process.env.DB_PASS,
     port: 5432,
+    ssl: { rejectUnauthorized: false } // Opção para permitir conexões sem SSL
 });
