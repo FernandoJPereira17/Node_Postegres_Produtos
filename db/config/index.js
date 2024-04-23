@@ -5,7 +5,7 @@ import pg from 'pg';
 //poderia fazer na linha 7 new pg.Pool e não ter a linha 5
 const { Pool } = pg;
 
-console.log('Enviroment', process.env);
+// console.log('Enviroment', process.env);
 
 export const config = new Pool({
     user: process.env.DB_USER,

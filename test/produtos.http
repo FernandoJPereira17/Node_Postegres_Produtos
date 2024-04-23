@@ -1,17 +1,18 @@
-GET http://[::1]:5000/produtos
+GET http://127.0.0.1:5000/produtos
 ###
 
-POST http://[::1]:5000/produto
+POST http://127.0.0.1:5000/produto
 Content-Type: application/json
 
 {
-    "nome": "Produto_Teste1",
-    "descricao": "Descrição do produto teste",
-    "desconto": 10,
-    "preco": 99,
-    "ativo": true,
-    "categoria": "Teste",
-    "data_cadastro": "2024-04-01"
+    "id": 1,
+    "nome": "Produto T",
+    "descricao": "Descrição do produto teste 4",
+    "desconto": 0,
+    "preco": 10,
+    "ativo": false,
+    "categoria": "Teste 3",
+    "data_cadastro": "2024-03-19"
 }
 
 ###
