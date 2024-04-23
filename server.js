@@ -4,7 +4,6 @@ import { connection } from './db/db.js';
 import { produtosRoute } from './routes/produtos.routes.js';
 
 const PORT = 5000
-
 //Para subir no render o HOST precisa ser adicionando como '0.0.0.0', 
 //quando não houver variável de ambiente HOST o servidor usará '127.0.0.1'
 const HOST = process.env.HOST || '127.0.0.1';
